@@ -13,6 +13,18 @@ DELTA = {
     pg.K_RIGHT: (5, 0)
 }
 
+def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
+    """
+    引数：こうかとんRect または 爆弾Rect
+    戻り値：真偽値タプル（横方向、縦方向）
+    画面内：True、画面外：False
+    """
+    yk, tt = True, True
+    if rct.left < 0 or WIDTH < rct.right:
+        yk = False
+    if rct.top < 0 or HEIGHT < rct.bottom:
+        tt = False
+    return yk, tt
 
 
 def main():
@@ -45,7 +57,19 @@ def main():
                 sum_mv[0] += delta[0]
                 sum_mv[1] += delta[1]
         kk_rct.move_ip(sum_mv)
+
+        if check_bound(kk_rct)[0] is False:
+            kk_rct.move_ip(-sum_mv[0], 0)
+        if check_bound(kk_rct)[1] is False:
+            kk_rct.move_ip(0, -sum_mv[1])
+
         screen.blit(kk_img, kk_rct)
+        bb_rct.move_ip(vx, vy)
+        yoko, tate = check_bound(bb_rct)
+        if yoko is False:
+            vx *= -1
+        if tate is False:
+            vy *= -1
         pg.display.update()
         tmr += 1
         clock.tick(50)
