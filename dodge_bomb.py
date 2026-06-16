@@ -68,6 +68,37 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
     bb_accs = [a for a in range(1, 11)]
     return bb_imgs, bb_accs
 
+def get_kk_imgs() -> dict[tuple[int, int], pg.Surface]:
+    """
+    移動量タプルをキー、その方向に応じたこうかとん画像Surfaceを値とした辞書を生成する。
+
+    引数:
+        なし
+
+    戻り値:
+        dict[tuple[int, int], pg.Surface]: 移動量 (vx, vy) に対するこうかとん画像Surfaceの辞書
+    """
+    # ベースとなるこうかとん画像（右向きにするためにまずはflipするのが一般的です）
+    # 元の画像（3.png）は左を向いているので、左右反転させて右向きの基準画像を作ります
+    base_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
+    img_r = pg.transform.flip(base_img, True, False)
+    img_l = base_img                                
+
+    # 各方向の移動量タプルに対応する回転画像を辞書に登録
+    kk_dict = {
+        (0, 0):   img_l,                                       
+        (+5, 0):  img_r,                                       
+        (+5, -5): pg.transform.rotozoom(img_r, 45, 1.0),       
+        (0, -5):  pg.transform.rotozoom(img_r, 90, 1.0),       
+        (-5, -5): pg.transform.rotozoom(img_l, -45, 1.0),      
+        (-5, 0):  img_l,                                       
+        (-5, +5): pg.transform.rotozoom(img_l, 45, 1.0),       
+        (0, +5):  pg.transform.rotozoom(img_l, -90, 1.0),      
+        (+5, +5): pg.transform.rotozoom(img_r, -45, 1.0),      
+    }
+    
+    return kk_dict
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -77,7 +108,10 @@ def main():
     bb_rct = bb_img.get_rect()
     bb_rct.centerx = random.randint(0, WIDTH)
     bb_rct.centery = random.randint(0, HEIGHT)
-    kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
+    # 8方向のこうかとん画像辞書を取得
+    kk_imgs = get_kk_imgs()
+    # 初期画像として静止時(0, 0)の画像を設定
+    kk_img = kk_imgs[(0, 0)]
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
     clock = pg.time.Clock()
@@ -97,7 +131,8 @@ def main():
                 sum_mv[0] += delta[0]
                 sum_mv[1] += delta[1]
         kk_rct.move_ip(sum_mv)
-
+        # 合計移動量をタプルにして辞書から対応する画像を抽出
+        kk_img = kk_imgs[tuple(sum_mv)]
         if check_bound(kk_rct)[0] is False:
             kk_rct.move_ip(-sum_mv[0], 0)
         if check_bound(kk_rct)[1] is False:
