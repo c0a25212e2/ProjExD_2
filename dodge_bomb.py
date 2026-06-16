@@ -99,6 +99,34 @@ def get_kk_imgs() -> dict[tuple[int, int], pg.Surface]:
     
     return kk_dict
 
+def activate_frenzy_mode(screen: pg.Surface, kk_rct: pg.Rect, bb_rct: pg.Rect) -> tuple[int, int]:
+    """
+    10秒経過後に発動する「血迷いモード」。背景を紫色に変更し、
+    こうかとんが爆弾を自動追尾するための移動量を計算して返す。
+
+    引数:
+        screen (pg.Surface): 描画対象のメイン画面Surface
+        kk_rct (pg.Rect): こうかとんのRectオブジェクト
+        bb_rct (pg.Rect): 爆弾のRectオブジェクト
+
+    戻り値:
+        tuple[int, int]: 爆弾を追尾するためのこうかとんの移動量 (vx, vy)
+    """
+    # 1. 背景を紫（赤と青を混ぜた色：128, 0, 128 など）で塗りつぶす
+    screen.fill((128, 0, 128))
+    
+    # 2. こうかとんから見た爆弾の方向（ベクトル）を計算
+    # 爆弾の座標 - こうかとんの座標
+    dx = bb_rct.centerx - kk_rct.centerx
+    dy = bb_rct.centery - kk_rct.centery
+    
+    # 3. 追尾する速度を設定（今回は少し速めの速度 4 に調整）
+    # 方向に応じて移動量を +4, -4, 0 に振り分ける
+    kk_vx = 4 if dx > 0 else (-4 if dx < 0 else 0)
+    kk_vy = 4 if dy > 0 else (-4 if dy < 0 else 0)
+    
+    return kk_vx, kk_vy
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
