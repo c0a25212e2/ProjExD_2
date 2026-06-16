@@ -2,7 +2,7 @@ import os
 import sys
 import pygame as pg
 import random
-
+import time
 
 WIDTH, HEIGHT = 1100, 650
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -26,6 +26,24 @@ def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
         tt = False
     return yk, tt
 
+def gameover(screen: pg.Surface) -> None:
+    """
+    ゲームオーバー画面を表示する関数
+    引数：screen（描画対象の画面Surface）
+    """
+    Bbg_img = pg.Surface((WIDTH, HEIGHT))     
+    pg.draw.rect(Bbg_img, (0, 0, 0), (0, 0, WIDTH, HEIGHT))
+    Bbg_img.set_alpha(180) 
+    font = pg.font.Font(None, 80)
+    txt = font.render("Game Over", True, (255, 255, 255))
+    cry_kk_l = pg.image.load("fig/8.png")
+    cry_kk_r = pg.transform.flip(cry_kk_l, True, False)
+    Bbg_img.blit(txt, (WIDTH // 2 - txt.get_width() // 2, HEIGHT // 2 - txt.get_height() // 2))
+    Bbg_img.blit(cry_kk_l, (WIDTH // 2 - txt.get_width() // 2 - cry_kk_l.get_width(), HEIGHT // 2 - txt.get_height() // 2))
+    Bbg_img.blit(cry_kk_r, (WIDTH // 2 + txt.get_width() // 2, HEIGHT // 2 - txt.get_height() // 2))
+    screen.blit(Bbg_img, (0, 0))
+    pg.display.update()
+    time.sleep(5)  
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -74,6 +92,7 @@ def main():
         tmr += 1
         clock.tick(50)
         if kk_rct.colliderect(bb_rct):
+            gameover(screen)
             return
 
 
